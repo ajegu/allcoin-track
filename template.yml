@@ -1,0 +1,142 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  allcoin-track
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+##########################################################################
+#  Globals                                                               #
+##########################################################################
+Globals:
+  Function:
+    Runtime: provided.al2
+    Layers:
+      - arn:aws:lambda:eu-west-3:209497400698:layer:php-80:8
+    MemorySize: 128
+    Timeout: 900
+    Environment:
+      Variables:
+        APP_TIMEZONE: "Europe/Paris"
+        LOG_CHANNEL: "stderr"
+        AWS_DDB_TABLE_NAME: !Ref AllCoinTrackTable
+
+Resources:
+
+  ##########################################################################
+  #  Lambda function BinanceAssetSyncFunction                              #
+  ##########################################################################
+  BinanceAssetSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AllCoinTrack-BinanceAssetSync
+      Handler: public/binance_asset_sync.php
+      Description: Sync assets from Binance.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AllCoinTrackTable
+
+  ##########################################################################
+  #  Lambda function BinancePriceSyncFunction                              #
+  ##########################################################################
+  BinancePriceSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AllCoinTrack-BinancePriceSync
+      Handler: public/binance_price_sync.php
+      Description: Sync prices from Binance.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AllCoinTrackTable
+
+  AllCoinTrackEventPrice:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Event rule for prices sync
+      Name: AllCoinTrackEventPrice
+      EventBusName: default
+      ScheduleExpression: "rate(1 minute)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt BinanceAssetSyncFunction.Arn
+          Id: !Ref BinancePriceSyncFunction
+
+  AllCoinTrackLambdaPermissionBinancePriceSyncFunction:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref BinancePriceSyncFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt AllCoinTrackEventPrice.Arn
+
+  ##########################################################################
+  #  DynamoDB configuration                                                #
+  ##########################################################################
+  AllCoinTrackTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: allcoin-track
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: lsi1
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: lsi1
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: lsi2
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: lsi2
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: lsi3
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: lsi3
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: lsi4
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: lsi4
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: lsi5
+          KeySchema:
+            - AttributeName: pk
+              KeyType: HASH
+            - AttributeName: lsi5
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: lsi1
+          AttributeType: S
+        - AttributeName: lsi2
+          AttributeType: S
+        - AttributeName: lsi3
+          AttributeType: S
+        - AttributeName: lsi4
+          AttributeType: N
+        - AttributeName: lsi5
+          AttributeType: N

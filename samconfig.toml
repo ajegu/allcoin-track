@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "AllCoinTrack"
+s3_bucket = "allcoin-track-sam-deployment"
+s3_prefix = "AllCoinTrack"
+region = "eu-west-3"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
