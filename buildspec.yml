@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+    COMPOSER_CACHE_DIR: .composer/
+
+phases:
+  install:
+    commands:
+      - mkdir -p .composer/
+  build:
+    commands:
+      - composer install --prefer-dist --no-progress --optimize-autoloader
+
+artifacts:
+  files:
+    - app/**/*
+    - bootstrap/**/*
+    - public/**/*
+    - vendor/**/*
+  name: allcoin-track.zip
+
+cache:
+  paths:
+    - .composer/**/*
