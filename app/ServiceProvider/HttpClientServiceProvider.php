@@ -1,7 +1,7 @@
 <?php
 
 
-namespace AllCoinTrack\Providers;
+namespace AllCoinTrack\ServiceProvider;
 
 
 use Http\Adapter\Guzzle7\Client;

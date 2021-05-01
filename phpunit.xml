@@ -22,7 +22,7 @@
             <directory suffix=".php">allcoin</directory>
         </include>
         <exclude>
-            <directory suffix=".php">app/Providers</directory>
+            <directory suffix=".php">app/ServiceProvider</directory>
         </exclude>
     </coverage>
     <php>

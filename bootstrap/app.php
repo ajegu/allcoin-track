@@ -6,7 +6,7 @@ use AllCoinCore\ServiceProvider\BinanceServiceProvider;
 use AllCoinCore\ServiceProvider\DynamoDbServiceProvider;
 use AllCoinCore\ServiceProvider\RepositoryServiceProvider;
 use AllCoinCore\ServiceProvider\SerializerServiceProvider;
-use AllCoinTrack\Providers\HttpClientServiceProvider;
+use AllCoinTrack\ServiceProvider\HttpClientServiceProvider;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
