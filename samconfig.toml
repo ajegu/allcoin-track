@@ -6,5 +6,5 @@ stack_name = "AllCoinTrack"
 s3_bucket = "allcoin-track-sam-deployment"
 s3_prefix = "AllCoinTrack"
 region = "eu-west-3"
-confirm_changeset = true
+confirm_changeset = false
 capabilities = "CAPABILITY_IAM"

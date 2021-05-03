@@ -3,7 +3,7 @@ Description: >-
   allcoin-track
 
 Transform:
-- AWS::Serverless-2016-10-31
+  - AWS::Serverless-2016-10-31
 
 ##########################################################################
 #  Globals                                                               #
@@ -21,53 +21,67 @@ Globals:
         LOG_CHANNEL: "stderr"
         AWS_DDB_TABLE_NAME: !Ref AllCoinTrackTable
 
+##########################################################################
+#  Resources                                                             #
+##########################################################################
 Resources:
 
   ##########################################################################
-  #  Lambda function BinanceAssetSyncFunction                              #
+  #  Lambda function AssetSyncFunction                                     #
   ##########################################################################
-  BinanceAssetSyncFunction:
+  AssetSyncFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: AllCoinTrack-BinanceAssetSync
-      Handler: public/binance_asset_sync.php
+      FunctionName: AllCoinTrack-AssetSync
+      Handler: public/asset_sync.php
       Description: Sync assets from Binance.
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref AllCoinTrackTable
 
   ##########################################################################
-  #  Lambda function BinancePriceSyncFunction                              #
+  #  Lambda function PriceSyncFunction                                     #
   ##########################################################################
-  BinancePriceSyncFunction:
+  PriceSyncFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: AllCoinTrack-BinancePriceSync
-      Handler: public/binance_price_sync.php
+      FunctionName: AllCoinTrack-PriceSync
+      Handler: public/price_sync.php
       Description: Sync prices from Binance.
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref AllCoinTrackTable
+      Events:
+        PriceSyncScheduleEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
 
-  AllCoinTrackEventPrice:
-    Type: AWS::Events::Rule
+  ##########################################################################
+  #  Lambda function AssetListFunction                                     #
+  ##########################################################################
+  AssetListFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      Description: Event rule for prices sync
-      Name: AllCoinTrackEventPrice
-      EventBusName: default
-      ScheduleExpression: "rate(1 minute)"
-      State: ENABLED
-      Targets:
-        - Arn: !GetAtt BinancePriceSyncFunction.Arn
-          Id: !Ref BinancePriceSyncFunction
+      FunctionName: AllCoinTrack-AssetList
+      Handler: public/asset_list.php
+      Description: List all assets.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AllCoinTrackTable
 
-  AllCoinTrackLambdaPermissionBinancePriceSyncFunction:
-    Type: AWS::Lambda::Permission
+  ##########################################################################
+  #  Lambda function PriceSearchFunction                                   #
+  ##########################################################################
+  PriceSearchFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref BinancePriceSyncFunction
-      Principal: events.amazonaws.com
-      SourceArn: !GetAtt AllCoinTrackEventPrice.Arn
+      FunctionName: AllCoinTrack-PriceSearch
+      Handler: public/price_search.php
+      Description: Search prices for an asset pair by date range.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AllCoinTrackTable
 
   ##########################################################################
   #  DynamoDB configuration                                                #
@@ -77,7 +91,7 @@ Resources:
     Properties:
       TableName: allcoin-track
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
+        ReadCapacityUnits: 20
         WriteCapacityUnits: 5
       KeySchema:
         - AttributeName: pk
@@ -140,3 +154,18 @@ Resources:
           AttributeType: N
         - AttributeName: lsi5
           AttributeType: N
+
+##########################################################################
+#  Outputs                                                               #
+##########################################################################
+Outputs:
+  AssetListFunctionName:
+    Description: Asset list function name
+    Value: !Ref AssetListFunction
+    Export:
+      Name: !Sub "${AWS::StackName}-AssetListFunctionName"
+  PriceSearchFunctionName:
+    Description: Price search function name
+    Value: !Ref PriceSearchFunction
+    Export:
+      Name: !Sub "${AWS::StackName}-PriceSearchFunctionName"

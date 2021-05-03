@@ -4,7 +4,7 @@ use AllCoinCore\Exception\Handler;
 use AllCoinCore\ServiceProvider\AwsServiceProvider;
 use AllCoinCore\ServiceProvider\BinanceServiceProvider;
 use AllCoinCore\ServiceProvider\DynamoDbServiceProvider;
-use AllCoinCore\ServiceProvider\RepositoryServiceProvider;
+use AllCoinTrack\ServiceProvider\RepositoryServiceProvider;
 use AllCoinCore\ServiceProvider\SerializerServiceProvider;
 use AllCoinTrack\ServiceProvider\HttpClientServiceProvider;
 

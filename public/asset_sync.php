@@ -1,9 +1,9 @@
 <?php
 /** @var Application $app */
 
-use AllCoinTrack\Lambda\BinanceAssetSyncLambda;
+use AllCoinTrack\Lambda\AssetSyncLambda;
 use Laravel\Lumen\Application;
 
 $app = require __DIR__ . '/../bootstrap/app.php';
 
-return $app->make(BinanceAssetSyncLambda::class);
+return $app->make(AssetSyncLambda::class);
